@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 options(warn=-1)
 Sys.setenv(LANG="EN")
 suppressPackageStartupMessages(library("optparse"))
