@@ -168,7 +168,7 @@ option_list <- list(
                                 help="Do not plot the graph"),
                     make_option(c("-s", "--shoulders"), action="store_true", default=FALSE,
                                 help="Remove peak's shoulders"),
-                     make_option(c("-t", "--thrashold"), type="double", default=0.35,
+                     make_option(c("-t", "--threshold"), type="double", default=0.35,
                                 help="About deleting weak peaks [default %default]"),
 					 make_option(c("-b", "--BkgSub"), action="store_true", default=FALSE,
                                 help="Write data with background subtracted")			
@@ -223,7 +223,7 @@ print(paste("Maximal differens: ", max(result$refined.deg - peak.list)))
 
 print("Removing low peaks...")
 old.length <- length(result$refined.deg)
-result <- subset(result, refined.int.rel > opt$thrashold)
+result <- subset(result, refined.int.rel > opt$threshold)
 print(paste( old.length - length(result$refined.deg)  ," weak peaks were removed"))
 
 print("Counting peaks...")
