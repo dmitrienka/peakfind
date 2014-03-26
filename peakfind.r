@@ -1,4 +1,4 @@
-#!/usr/bin/env Rscript
+#!/usr/bin/Rscript
 
 options(warn=-1)
 Sys.setenv(LANG="EN")
@@ -76,9 +76,9 @@ read.hkl <- function(file.inp){
     lp.scale <- function (th2, i){
         (1 + cos(lp.factor)^2 * cos(th2/180*pi)^2) / (sin(th2/360*pi)^2 * cos(th2/360*pi)) * i}
 
-    return(data.frame(h = abs(b[1,]),
-                      k = abs(b[2,]),
-                      l = abs(b[3,]),
+    return(data.frame(h = b[1,],
+                      k = b[2,],
+                      l = b[3,],
                       m = b[4,],
                       d = b[5,],
                       th2 = b[6,],
@@ -168,13 +168,13 @@ option_list <- list(
                                 help="Do not plot the graph"),
                     make_option(c("-s", "--shoulders"), action="store_true", default=FALSE,
                                 help="Remove peak's shoulders"),
-                     make_option(c("-t", "--trashold"), type="double", default=0.35,
+                     make_option(c("-t", "--thrashold"), type="double", default=0.35,
                                 help="About deleting weak peaks [default %default]"),
 					 make_option(c("-b", "--BkgSub"), action="store_true", default=FALSE,
                                 help="Write data with background subtracted")			
                                        )
 
-parser    <- OptionParser(usage = "peakfind.r [options] data.file bkg.file", option_list=option_list)
+parser    <- OptionParser(usage = "peakfind.r [options] data.file pro.file", option_list=option_list)
 arguments <- parse_args(parser, positional_arguments = TRUE)
 opt       <- arguments$options
 
@@ -223,7 +223,7 @@ print(paste("Maximal differens: ", max(result$refined.deg - peak.list)))
 
 print("Removing low peaks...")
 old.length <- length(result$refined.deg)
-result <- subset(result, refined.int.rel > opt$trashold)
+result <- subset(result, refined.int.rel > opt$thrashold)
 print(paste( old.length - length(result$refined.deg)  ," weak peaks were removed"))
 
 print("Counting peaks...")
