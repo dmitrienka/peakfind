@@ -14,6 +14,14 @@ suppressPackageStartupMessages(library("pastecs"))
 	                     peak.vector)
 	              return(NULL)}
 
+
+start.x <- function(file){
+    start <-  grep("start_X", readLines(file), perl=TRUE, value=TRUE)
+    if (length(start) == 0)
+        FALSE
+    else
+        as.numeric(gsub("^[^0-9]+([0-9.]+).*$", "\\1", start, perl=TRUE))}
+
 is.shoulder <- function(peak.vector, pattern.deg, pattern.exp, delta)
 {
     logik.vector <- mapply(function(peak)
@@ -154,25 +162,27 @@ is.overlaped <- function(degrees, d)  ## ААААА! Быдлокод!!!!
 
 
 option_list <- list(
-                    make_option(c("-o", "--output"), default="icdd.cif",
-                                help="Name of output file, [default \"%default\"]"),
-                    make_option(c("-g", "--graph"), default="check.eps",
-                                help="Name of the graph file, [default \"%default\"]"),
-                    make_option(c("-c", "--crop"), type="double", default=60,
-                                help="Max 2theta, [default %default]"),
-                    make_option(c("-d", "--delta"), type="double", default=0.037,
-                                help="Delta for peak position correction [default %default]"),
-                    make_option(c("-p", "--peak"),  default="empty",
-                                help="Add peaks manualy. Use notation like this: -p \"1.1 5.987 10\"  "),
-                     make_option(c("-n", "--DisableGraph"), action="store_true", default=FALSE,
-                                help="Do not plot the graph"),
-                    make_option(c("-s", "--shoulders"), action="store_true", default=FALSE,
-                                help="Remove peak's shoulders"),
-                     make_option(c("-t", "--threshold"), type="double", default=0.35,
-                                help="About deleting weak peaks [default %default]"),
-					 make_option(c("-b", "--BkgSub"), action="store_true", default=FALSE,
-                                help="Write data with background subtracted")			
-                                       )
+    make_option(c("-o", "--output"), default="icdd.cif",
+                help="Name of output file, [default \"%default\"]"),
+    make_option(c("-g", "--graph"), default="check.eps",
+                help="Name of the graph file, [default \"%default\"]"),
+    make_option(c("-c", "--crop"), type="double", default=60,
+                help="Max 2theta, [default %default]"),
+    make_option(c("-d", "--delta"), type="double", default=0.037,
+                help="Delta for peak position correction [default %default]"),
+    make_option(c("-p", "--peak"),  default="empty",
+                help="Add peaks manualy. Use notation like this: -p \"1.1 5.987 10\"  "),
+    make_option(c("-n", "--DisableGraph"), action="store_true", default=FALSE,
+                help="Do not plot the graph"),
+    make_option(c("-s", "--shoulders"), action="store_true", default=FALSE,
+                help="Remove peak's shoulders"),
+    make_option(c("-x", "--startx"),  type="double", default=0,
+                help="Start X"),
+    make_option(c("-t", "--threshold"), type="double", default=0.35,
+                help="About deleting weak peaks [default %default]"),
+    make_option(c("-b", "--BkgSub"), action="store_true", default=FALSE,
+                help="Write data with background subtracted")			
+    )
 
 parser    <- OptionParser(usage = "peakfind.r [options] data.file pro.file", option_list=option_list)
 arguments <- parse_args(parser, positional_arguments = TRUE)
@@ -187,7 +197,10 @@ if (length(arguments$args) != 2)
 
 ## Reading data
 
+mask <- max(start.x(arguments$args[[2]]), opt$startx)
+
 topas.data <- read.table(arguments$args[[1]], sep=",", skip=2, col.names=c("X","Yobs","Ycalc","Ydiff","Bkg"))
+topas.data <- topas.data[topas.data$X > mask,]
 hkl.data <- read.hkl(arguments$args[[2]])
 bkg <- topas.data$Bkg[topas.data$X < opt$crop]
 work.area.degree <- topas.data$X[topas.data$X < opt$crop]
