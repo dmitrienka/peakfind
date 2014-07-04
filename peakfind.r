@@ -61,19 +61,21 @@ go.to.dot <- function(dirty.vector, pattern.deg)
        }, dirty.vector)
 }
 
+trim.leading <- function (x)  sub("^\\s+", "", x)
+
 read.hkl <- function(file.inp){
     b <- sapply(grep("hkl_m_d_th2",
                      readLines(file.inp),
                      perl=TRUE, value=TRUE),
                 function(hkl.string){
-                    a <- strsplit(hkl.string, " ")[[1]]
-                    return(c(as.integer(a[2]),
-                             as.integer(a[3]),
-                             as.integer(a[4]),
-                             as.integer(a[5]),
-                             as.numeric(a[6]),
-                             as.numeric(a[7]),
-                             as.numeric(strsplit(a[10], "_")[[1]][1])))})
+                    a <- strsplit(trim.leading(hkl.string), "[@ \t`_]+")[[1]]
+                    return(c(as.integer(a[5]),
+                             as.integer(a[6]),
+                             as.integer(a[7]),
+                             as.integer(a[8]),
+                             as.numeric(a[9]),
+                             as.numeric(a[10]),
+                             as.numeric(a[12])))})
     lp.factor <-  grep("LP_Factor", readLines(file.inp), perl=TRUE, value=TRUE)
 
     if (length(lp.factor) == 0)
@@ -202,6 +204,7 @@ mask <- max(start.x(arguments$args[[2]]), opt$startx)
 topas.data <- read.table(arguments$args[[1]], sep=",", skip=2, col.names=c("X","Yobs","Ycalc","Ydiff","Bkg"))
 topas.data <- topas.data[topas.data$X > mask,]
 hkl.data <- read.hkl(arguments$args[[2]])
+hkl.data <- hkl.data[hkl.data$th2 >= topas.data$X[1], ]
 bkg <- topas.data$Bkg[topas.data$X < opt$crop]
 work.area.degree <- topas.data$X[topas.data$X < opt$crop]
 work.area.calc <- topas.data$Ycalc[topas.data$X < opt$crop]
@@ -211,6 +214,7 @@ no.bkg.exp <- work.area.exp - bkg
 
 ## Finding peaks
 
+head(hkl.data)
 
 extrema.logic <- extract.turnpoints(turnpoints(work.area.calc), no.tp=FALSE, pit=FALSE, peak=TRUE)
 peak.list <- work.area.degree[which(extrema.logic)]
